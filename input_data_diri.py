@@ -1,6 +1,8 @@
 import customtkinter as ctk
 from tkinter import *
 from customtkinter import *
+import sqlite3 as sql
+
 
 def show_page1():
     page2_frame.pack_forget()
@@ -11,6 +13,8 @@ def show_page2():
     page2_frame.pack(fill="both", expand=True)
 
 def submit_data():
+    global nama, nim, peminatan, alamat, jenis_kelamin
+    
     nama = entry_nama.get()
     nim = entry_nim.get()
     peminatan = peminatan_var.get()
@@ -20,10 +24,31 @@ def submit_data():
     result_label.configure(text=f"Nama: {nama}\nNIM: {nim}\nPeminatan: {peminatan}\nAlamat: {alamat}\nJenis Kelamin: {jenis_kelamin}")
     show_page2()
 
+def submit_database():
+    global nama, nim, peminatan, alamat, jenis_kelamin
+
+    koneksi = sql.connect('C:\Teknik Industri\Lintang\database_dss.db') # Disesuaikan dengan file di komputer anda
+    cursor = koneksi.cursor()
+    cursor.execute ('''CREATE TABLE IF NOT EXISTS dss_21 (
+    nama TEXT,
+    nim CHAR,
+    peminatan CHAR,
+    alamat CHAR,
+    jenis_kelamin CHAR
+    )''')
+
+    cursor.execute(f'''INSERT INTO dss_21 (nama, nim, peminatan, alamat, jenis_kelamin)
+                    VALUES ('{nama}','{nim}','{peminatan}','{alamat}','{jenis_kelamin}')''')
+
+    koneksi.commit()
+    koneksi.close()
+    show_page2()
+
 # Inisialisasi aplikasi
 app = ctk.CTk()
 app.title("Form Input Data Diri Mahasiswa")
 app.geometry("400x500")
+ctk.set_appearance_mode("light")
 
 # Halaman 1
 page1_frame = ctk.CTkFrame(app)
@@ -69,6 +94,8 @@ result_label = ctk.CTkLabel(page2_frame, text="")
 result_label.pack(pady=10)
 page2_button = ctk.CTkButton(page2_frame, text="Kembali ke Halaman 1", command=show_page1)
 page2_button.pack(pady=20)
+tombol_kirimdb = ctk.CTkButton(page2_frame, text="Kirim data ke database", command=submit_database)
+tombol_kirimdb.pack(pady=20)
 
 # Tampilkan halaman 1 saat aplikasi dimulai
 show_page1()
